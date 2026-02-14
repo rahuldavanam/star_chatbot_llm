@@ -37,8 +37,10 @@ This will:
 python -m venv .venv
 
 # Activate it
-# Windows: .venv\Scripts\activate
-# Linux/Mac: source .venv/bin/activate
+# Windows: 
+.venv\Scripts\activate
+# Linux/Mac: 
+source .venv/bin/activate
 
 # Install dependencies
 pip install -r requirements.txt
