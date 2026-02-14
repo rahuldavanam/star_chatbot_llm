@@ -1,4 +1,4 @@
-# Support Ticket Chatbot
+# IT Support Ticket Chatbot
 
 AI-powered technical support assistant that provides troubleshooting solutions based on historical ticket data using RAG (Retrieval-Augmented Generation).
 
