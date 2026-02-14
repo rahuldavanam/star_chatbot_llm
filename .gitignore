@@ -1,0 +1,10 @@
+.DS_Store
+__pycache__/
+.venv/
+
+*.db
+*.xlsx
+*.svg
+*.pptx
+*.faiss
+*.pkl

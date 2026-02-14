@@ -1,0 +1,9 @@
+streamlit
+pandas
+python-dateutil
+faiss-cpu
+numpy
+openpyxl
+ollama
+requests
+tqdm
