@@ -23,14 +23,19 @@ def generate_response(ticket, ranked_solutions):
         Generate a concise, structured troubleshooting response.
     """
 
-    res = requests.post(
-        OLLAMA_URL,
-        json={
-            "model": MODEL,
-            "prompt": prompt,
-            "stream": False
-        },
-        timeout=90
-    )
-
-    return res.json()["response"]
+    try:
+        res = requests.post(
+            OLLAMA_URL,
+            json={
+                "model": MODEL,
+                "prompt": prompt,
+                "stream": False
+            },
+            timeout=90
+        )
+        res.raise_for_status()
+        return res.json()["response"]
+    except requests.Timeout:
+        return "Error: Request timed out. Please try again later."
+    except requests.RequestException as e:
+        return f"Error: Failed to generate response - {str(e)}"
