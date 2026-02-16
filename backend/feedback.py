@@ -1,9 +1,32 @@
+from math import sqrt
 import sqlite3
 from datetime import datetime
 
 
 DB_PATH = "data/feedback.db"
 
+def wilson_score(success, attempts, z=1.96):
+    """
+    Compute Wilson lower bound score.
+
+    Args:
+        success (int): Number of successful outcomes.
+        attempts (int): Total attempts.
+        z (float): Z-score for confidence level (1.96 ≈ 95%).
+
+    Returns:
+        float: Wilson score between 0 and 1.
+    """
+    if attempts == 0:
+        return 0.0
+
+    p = success / attempts
+
+    denominator = 1 + (z**2 / attempts)  # Normalization factor
+    centre = p + (z**2 / (2 * attempts)) # Adjustment term
+    margin = z * sqrt((p * (1 - p) + (z**2 / (4 * attempts))) / attempts)  # Uncertain penalty
+
+    return (centre - margin) / denominator
 
 def init_db():
     """
@@ -76,5 +99,6 @@ def get_feedback(ticket_id, solution_level):
     conn.close()
 
     if row:
-        return (row[0]+1) / (row[1]+1) # Laplace smoothing for prioritizing mature solutions
-    return 0.0
+        return wilson_score(row[0], row[1])
+    else:
+        return 0.0
