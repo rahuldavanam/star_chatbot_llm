@@ -70,6 +70,74 @@ streamlit run app.py
 
 ## Architecture
 
+### Flow diagram
+
+```mermaid
+%% Architecture Diagram for Star Chatbot LLM Application
+graph TB
+    subgraph User Interface
+        UI[Streamlit UI<br/>app.py]
+    end
+
+    subgraph Data Layer
+        XLSX[(Excel Dataset<br/>tickets_dataset.xlsx)]
+        DB[(SQLite DB<br/>feedback.db)]
+    end
+
+    subgraph Backend Services
+        DL[Data Loader<br/>data_loader.py<br/>Parses datetime fields]
+        VS[Vector Search<br/>embedding_search.py<br/>Combines similarity + recency]
+        RK[Ranker<br/>ranker.py<br/>Feedback-driven ranking]
+        LLM[LLM Generator<br/>llm.py]
+        FB[Feedback<br/>feedback.py<br/>Laplace smoothing]
+    end
+
+    subgraph External Services
+        OLLAMA[Ollama API<br/>localhost:11434]
+        EMBED[nomic-embed-text<br/>Embedding Model]
+        LLAMA[llama3.1:8b<br/>LLM Model]
+    end
+
+    %% Data Loading Flow
+    UI -->|1. Initialize| DL
+    DL -->|Load tickets + datetime| XLSX
+    DL -->|Tickets with metadata| VS
+
+    %% Embedding & Indexing Flow
+    VS -->|Embed all tickets| OLLAMA
+    OLLAMA -->|Use embedding model| EMBED
+    VS -->|Build FAISS index| VS
+
+    %% Search Flow
+    UI -->|2. User query| VS
+    VS -->|Embed query| OLLAMA
+    VS -->|Calculate 70% similarity + 30% recency<br/>vector_final_score| VS
+    VS -->|Top matched ticket| UI
+
+    %% Ranking Flow
+    UI -->|3. Matched ticket| RK
+    RK -->|Get feedback scores| FB
+    FB <-->|Query/Update success rates| DB
+    RK -->|Ranked solutions<br/>70% feedback, 30% escalation| UI
+
+    %% LLM Generation Flow
+    UI -->|4. Ticket + ranked solutions| LLM
+    LLM -->|Generate prompt + call| OLLAMA
+    OLLAMA -->|Use LLM model| LLAMA
+    LLM -->|Structured response| UI
+
+    %% Feedback Loop
+    UI -->|5. User feedback<br/>success/failure| FB
+    FB -->|Store with timestamp| DB
+
+    style UI fill:#e1f5ff
+    style XLSX fill:#fff4e1
+    style DB fill:#fff4e1
+    style OLLAMA fill:#ffe1e1
+    style EMBED fill:#ffe1e1
+    style LLAMA fill:#ffe1e1
+```
+
 ### Technology Stack
 - **Frontend:** Streamlit web interface
 - **Vector Database:** FAISS (Facebook AI Similarity Search) with cosine similarity
